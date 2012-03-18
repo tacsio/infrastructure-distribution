@@ -1,4 +1,4 @@
-package middleware.serializer;
+package middleware.marshaller;
 
 import middleware.Protocolo;
 
@@ -36,16 +36,15 @@ public class Marshaller {
 	public static byte[] marshallInt(int m) {
 
 		byte[] temp = intToByteArray(m);
-		byte[] msg = escreveCabecalho(temp, Protocolo.INT);
+		byte[] msg = escreveCabecalhoTransporte(temp, Protocolo.INT);
 
 		return msg;
 	}
 
-	// TODO: Serializar manualmente apartir daqui
 	public static byte[] marshallShort(short m) {
 
 		byte[] temp = Short.toString(m).getBytes();
-		byte[] msg = escreveCabecalho(temp, Protocolo.SHORT);
+		byte[] msg = escreveCabecalhoTransporte(temp, Protocolo.SHORT);
 
 		return msg;
 
@@ -54,28 +53,28 @@ public class Marshaller {
 	public static byte[] marshallLong(long m) {
 
 		byte[] temp = Long.toString(m).getBytes();
-		byte[] msg = escreveCabecalho(temp, Protocolo.LONG);
+		byte[] msg = escreveCabecalhoTransporte(temp, Protocolo.LONG);
 
 		return msg;
 	}
 
 	public static byte[] marshallFloat(float m) {
 		byte[] temp = Float.toString(m).getBytes();
-		byte[] msg = escreveCabecalho(temp, Protocolo.FLOAT);
+		byte[] msg = escreveCabecalhoTransporte(temp, Protocolo.FLOAT);
 
 		return msg;
 	}
 
 	public static byte[] marshallDouble(double m) {
 		byte[] temp = Double.toString(m).getBytes();
-		byte[] msg = escreveCabecalho(temp, Protocolo.DOUBLE);
+		byte[] msg = escreveCabecalhoTransporte(temp, Protocolo.DOUBLE);
 
 		return msg;
 	}
 
 	public static byte[] marshallString(String m) {
 		byte[] temp = m.getBytes();
-		byte[] msg = escreveCabecalho(temp, Protocolo.STRING);
+		byte[] msg = escreveCabecalhoTransporte(temp, Protocolo.STRING);
 
 		return msg;
 	}
@@ -101,7 +100,6 @@ public class Marshaller {
 		return byteArrayToInt(temp);
 	}
 
-	// TODO: Serializar manualmente apartir daqui
 	public static short unmarshallShort(byte[] msg) {
 		byte[] temp = extractDados(msg);
 		return Short.parseShort(new String(temp));
@@ -127,7 +125,7 @@ public class Marshaller {
 		return new String(temp);
 	}
 
-	private static byte[] escreveCabecalho(byte[] temp, byte tipo) {
+	private static byte[] escreveCabecalhoTransporte(byte[] temp, byte tipo) {
 		byte[] msg = new byte[temp.length + 1];
 		msg[0] = tipo;
 		for (int i = 0; i < temp.length; i++) {
@@ -142,6 +140,74 @@ public class Marshaller {
 			temp[i] = msg[i + 1];
 		}
 		return temp;
+	}
+
+	public static byte[] append(byte[] data1, byte[] data2) {
+
+		if (data1 == null) {
+			return data2;
+		} else if (data2 == null) {
+			return data1;
+		}
+
+		byte[] retorno = new byte[data1.length + data2.length];
+
+		for (int i = 0; i < data1.length; i++) {
+			retorno[i] = data1[i];
+		}
+		for (int i = data1.length; i < retorno.length; i++) {
+			retorno[i] = data2[i - data1.length];
+		}
+
+		return retorno;
+	}
+
+	public static byte[] marshall(Object m) {
+		if (m instanceof Boolean) {
+			return marshallBoolean(((Boolean) m).booleanValue());
+		} else if (m instanceof Character) {
+			return marshallChar(((Character) m).charValue());
+		} else if (m instanceof Byte) {
+			return marshallByte(((Byte) m).byteValue());
+		} else if (m instanceof Integer) {
+			return marshallInt(((Integer) m).intValue());
+		} else if (m instanceof Short) {
+			return marshallShort(((Short) m).shortValue());
+		} else if (m instanceof Long) {
+			return marshallLong(((Long) m).longValue());
+		} else if (m instanceof Float) {
+			return marshallFloat(((Float) m).floatValue());
+		} else if (m instanceof Double) {
+			return marshallDouble(((Double) m).doubleValue());
+		} else if (m instanceof String) {
+			return marshallString(m.toString());
+		}
+
+		return null;
+	}
+
+	public static Object unmarshall(byte[] msg) {
+
+		if (msg[0] == Protocolo.BOOLEAN) {
+			return unmarshallBoolean(msg);
+		} else if (msg[0] == Protocolo.CHAR) {
+			return unmarshallChar(msg);
+		} else if (msg[0] == Protocolo.BYTE) {
+			return unmarshallByte(msg);
+		} else if (msg[0] == Protocolo.INT) {
+			return unmarshallInt(msg);
+		} else if (msg[0] == Protocolo.SHORT) {
+			return unmarshallShort(msg);
+		} else if (msg[0] == Protocolo.LONG) {
+			return unmarshallLong(msg);
+		} else if (msg[0] == Protocolo.FLOAT) {
+			return unmarshallFloat(msg);
+		} else if (msg[0] == Protocolo.DOUBLE) {
+			return unmarshallDouble(msg);
+		} else if (msg[0] == Protocolo.STRING) {
+			return unmarshallString(msg);
+		}
+		return null;
 	}
 
 	private static byte[] intToByteArray(int value) {

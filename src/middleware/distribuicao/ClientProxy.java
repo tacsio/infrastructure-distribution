@@ -1,4 +1,4 @@
-package middleware;
+package middleware.distribuicao;
 
 import apps.IDL;
 
@@ -12,13 +12,13 @@ public class ClientProxy implements IDL {
 
 	@Override
 	public int convertCelsiusToKelvin(int temperatura) {
-		int retorno = requestor.invoke(1, temperatura);
+		int retorno = requestor.invoke("CelsiusToKelvin", temperatura);
 		return retorno;
 	}
 
 	@Override
-	public int convertKelvinToCelsius(int temperatura) {
-		int retorno = requestor.invoke(2, temperatura);
+	public int convertKelvinToCelsius(int temperatura, String ad, float f) {
+		int retorno = requestor.invoke("KelvinToCelsius", temperatura, ad,f);
 		return retorno;
 	}
 

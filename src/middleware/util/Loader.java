@@ -13,14 +13,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class LoadConfig {
+public class Loader {
 
 	private DocumentBuilderFactory dbf;
 	private DocumentBuilder db;
 	private Document doc;
 	private String xmlConfig;
 
-	public LoadConfig(Configuracao c) throws ParserConfigurationException,
+	public Loader(Configuracao c) throws ParserConfigurationException,
 			SAXException, IOException {
 		dbf = DocumentBuilderFactory.newInstance();
 		db = dbf.newDocumentBuilder();

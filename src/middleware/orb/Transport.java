@@ -18,9 +18,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 
 import middleware.Protocolo;
-import middleware.serializer.Marshaller;
+import middleware.marshaller.Marshaller;
 import middleware.util.Configuracao;
-import middleware.util.LoadConfig;
+import middleware.util.Loader;
 
 public class Transport implements ORB {
 
@@ -30,7 +30,7 @@ public class Transport implements ORB {
 
 		conf = new Configuracao();
 		try {
-			new LoadConfig(conf);
+			new Loader(conf);
 		} catch (ParserConfigurationException e) {
 			e.printStackTrace();
 		} catch (SAXException e) {
