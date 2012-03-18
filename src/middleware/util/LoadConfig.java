@@ -13,14 +13,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-public class Loader {
+public class LoadConfig {
 
 	private DocumentBuilderFactory dbf;
 	private DocumentBuilder db;
 	private Document doc;
 	private String xmlConfig;
 
-	public Loader(Configuracao c) throws ParserConfigurationException,
+	public LoadConfig(Configuracao c) throws ParserConfigurationException,
 			SAXException, IOException {
 		dbf = DocumentBuilderFactory.newInstance();
 		db = dbf.newDocumentBuilder();
@@ -35,7 +35,7 @@ public class Loader {
 		Element raiz = doc.getDocumentElement();
 
 		NodeList configuracoes = raiz.getElementsByTagName("config");
-		String protocolo = configuracoes.item(Protocolo.TCP).getFirstChild()
+		String protocolo = configuracoes.item(Protocolo.TPC).getFirstChild()
 				.getNodeValue();
 
 		String host;
@@ -43,7 +43,7 @@ public class Loader {
 		byte protocol = 0;
 
 		if (protocolo.equalsIgnoreCase("TCP")) {
-			protocol = Protocolo.TCP;
+			protocol = Protocolo.TPC;
 		} else if (protocolo.equalsIgnoreCase("UDP")) {
 			protocol = Protocolo.UDP;
 		} else if (protocolo.equalsIgnoreCase("HTTP")) {

@@ -12,23 +12,38 @@ import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;
-import java.util.Vector;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import middleware.Protocolo;
-import middleware.marshaller.Marshaller;
+import middleware.serializer.Marshaller;
 import middleware.util.Configuracao;
+import middleware.util.LoadConfig;
 
 public class Transport implements ORB {
 
 	private Configuracao conf;
 
-	public Transport(String host, int port) {
-		conf = new Configuracao(host, port);
+	public Transport() {
+
+		conf = new Configuracao();
+		try {
+			new LoadConfig(conf);
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+		} catch (SAXException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void send(byte[] msg) {
-		if (conf.getProtocol() == Protocolo.TCP) {
+
+		if (conf.getProtocol() == Protocolo.TPC) {
 			try {
 				sendTPC(msg);
 			} catch (UnknownHostException e) {
@@ -55,7 +70,7 @@ public class Transport implements ORB {
 	@Override
 	public byte[] receive() {
 
-		if (conf.getProtocol() == Protocolo.TCP) {
+		if (conf.getProtocol() == Protocolo.TPC) {
 			try {
 				return receiveTCP();
 			} catch (IOException e) {
@@ -78,7 +93,6 @@ public class Transport implements ORB {
 	}
 
 	private void sendTPC(byte[] msg) throws UnknownHostException, IOException {
-
 		Socket clientSocket = null;
 		clientSocket = new Socket(conf.getHost(), conf.getPort());
 		DataOutputStream dataOut;
@@ -93,40 +107,13 @@ public class Transport implements ORB {
 		Socket connectionSocket = welcomeSocket.accept();
 		BufferedReader inFromClient = new BufferedReader(new InputStreamReader(
 				connectionSocket.getInputStream()));
-		// seta o endereco e porta do destinatario
-		conf.setHost(connectionSocket.getInetAddress().getHostAddress());
-		conf.setPort(connectionSocket.getLocalPort());
 
-		boolean flag = true;
-		byte[] msg = null;
-		// rotina necessaria para "juntar" os pacotes ja que em um determinado
-		// tamanho de pacote enviado, java "quebra" o pacote em varios outros de
-		// tamanho variado
-		Vector<Byte> temp = new Vector<Byte>();
-		while (flag) {
-			int i = inFromClient.read();
-			if (i == -1)
-				flag = false;
-			else
-				temp.add((byte) i);
-		}
-		msg = new byte[temp.size()];
-		for (int i = 0; i < msg.length; i++) {
-			msg[i] = temp.get(i);
-		}
-
-		// trecho removido por falta de performance
-		//
-		// while (flag) {
-		// int i = inFromClient.read();
-		// if (i == -1)
-		// flag = false;
-		// else
-		// msg = Marshaller.appendByte(msg, (byte) i);
-		// }
+		String m = inFromClient.readLine();
+		byte[] msg = m.getBytes();
 
 		welcomeSocket.close();
 		connectionSocket.close();
+
 		return msg;
 	}
 
@@ -170,7 +157,7 @@ public class Transport implements ORB {
 		} else if (msg[0] == Protocolo.BYTE) {
 			s.append(msg[1]);
 		} else if (msg[0] == Protocolo.INT) {
-			s.append(Marshaller.unmarshallInt(temp));
+			s.append(Marshaller.byteArrayToInt(temp));
 		} else if (msg[0] == Protocolo.SHORT) {
 			s.append(Short.parseShort(new String(temp)));
 		} else if (msg[0] == Protocolo.LONG) {
@@ -188,7 +175,7 @@ public class Transport implements ORB {
 			}
 		}
 
-		// method GET
+		//method GET
 		URL url = new URL("http://" + conf.getHost() + "/data=" + s);
 		url.openStream();
 	}

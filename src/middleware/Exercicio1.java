@@ -1,15 +1,15 @@
-package middleware.orb;
+package middleware;
 
-import middleware.Protocolo;
-import middleware.marshaller.Marshaller;
+import middleware.orb.Transport;
+import middleware.serializer.Marshaller;
 
-public class Broker {
+public class Exercicio1 {
 
 	private Transport orb;
 
-	public Broker(String host, int port) {
+	public Exercicio1() {
 
-		orb = new Transport(host, port);
+		orb = new Transport();
 	}
 
 	public void send(Object m) {
@@ -32,8 +32,6 @@ public class Broker {
 			orb.send(Marshaller.marshallDouble(((Double) m).doubleValue()));
 		} else if (m instanceof String) {
 			orb.send(Marshaller.marshallString(m.toString()));
-		} else if (m instanceof int[]) {
-			orb.send(Marshaller.marshallIntArray((int[]) m));
 		}
 	}
 
@@ -58,11 +56,11 @@ public class Broker {
 			return Marshaller.unmarshallDouble(msg);
 		} else if (msg[0] == Protocolo.STRING) {
 			return Marshaller.unmarshallString(msg);
-		} else if (msg[0] == Protocolo.INT_ARRAY) {
-			return Marshaller.unmarshallIntArray(msg);
+		} else if (msg[0] == Protocolo.MESSAGE) {
+			return Marshaller.extractDados(msg);
 		}
 
-		return msg;
+		return null;
 	}
 
 	public void send(byte[] msg) {
